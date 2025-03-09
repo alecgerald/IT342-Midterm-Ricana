@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Contact Manager</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --sidebar-width: 280px;
+            --card-border-radius: 12px;
+            --transition-speed: 0.2s;
+        }
+
+        body {
+            background-color: #f9fafb;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #1f2937;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: #ffffff;
+            color: #1f2937;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header .logo {
+            background-color: rgba(79, 70, 229, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .sidebar .add-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background-color var(--transition-speed);
+        }
+
+        .sidebar .add-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            font-size: 0.875rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.625rem 0.75rem;
+            border-radius: 8px;
+            color: #4b5563;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        .nav-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        .nav-item.active {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+        }
+
+        .logout-btn {
+            margin-top: auto; /* Push the logout button to the bottom */
+            padding: 0.625rem 0.75rem;
+            border-radius: 8px;
+            color: #4b5563;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        .logout-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .logout-btn button {
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            text-align: left;
+            padding: 0;
+        }
+
+        .logout-btn button:hover {
+            color: var(--primary-color);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        /* Contact Cards Styles */
+        .contact-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .profile-pic {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .profile-info {
+            flex-grow: 1;
+        }
+
+        .profile-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-info .subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .contact-details {
+            margin-top: 1rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #4b5563;
+        }
+
+        .contact-item i {
+            width: 1.25rem;
+            margin-right: 0.75rem;
+            color: #6b7280;
+        }
+
+        .contact-item span {
+            font-size: 0.875rem;
+        }
+
+        .expandable {
+            cursor: pointer;
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+            transition: color var(--transition-speed);
+        }
+
+        .expandable:hover {
+            color: var(--primary-color);
+        }
+
+        .additional-info {
+            margin-top: 0.5rem;
+            padding-left: 2rem;
+            display: none;
+        }
+
+        .additional-info.show {
+            display: block;
+        }
+
+        /* Edit Icon */
+        .edit-icon {
+            color: #6b7280;
+            cursor: pointer;
+            transition: color var(--transition-speed);
+        }
+
+        .edit-icon:hover {
+            color: var(--primary-color);
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background-color: white;
+            border-bottom: 1px solid #f3f4f6;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .close-edit {
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: #6b7280;
+            background: none;
+            border: none;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all var(--transition-speed);
+        }
+
+        .close-edit:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        .delete-btn {
+            background-color: white;
+            border: 1px solid #fee2e2;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all var(--transition-speed);
+        }
+
+        .delete-btn:hover {
+            background-color: #fee2e2;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .add-field-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color var(--transition-speed);
+        }
+
+        .add-field-btn:hover {
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 0.625rem 0.75rem;
+            width: 100%;
+            font-size: 0.875rem;
+            transition: all var(--transition-speed);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.75rem;
+            width: 100%;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .invalid-feedback {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.375rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .contact-cards {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <i class="fas fa-address-book"></i>
+        </div>
+        <h1>Contact Manager</h1>
+    </div>
+
+    <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addContactModal">
+        <i class="fas fa-plus"></i> Add Contact
+    </button>
+
+    <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search contacts..." oninput="searchContacts()">
+    </div>
+
+    <div class="nav-item active">
+        <i class="fas fa-users me-2"></i> All Contacts
+    </div>
+
+    <!-- Logout Button at the Bottom of the Sidebar -->
+    <div class="nav-item logout-btn">
+        <form th:action="@{/logout}" method="POST">
+            <button type="submit" class="btn btn-link p-0" style="color: inherit; text-decoration: none;">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="content-header">
+        <h2>All Contacts</h2>
+    </div>
+
+    <div class="contact-cards" id="contactCards">
+        <!-- Contact Cards -->
+        <div class="contact-card" th:each="contact : ${contacts}"
+             th:if="${contact.names != null and contact.names.size() > 0}">
+            <div class="card-body">
+                <div class="profile-section">
+                    <div class="profile-pic">
+                        <!-- Display the first letter of the first name -->
+                        <span th:text="${#strings.substring(contact.names[0].displayName, 0, 1)}"></span>
+                    </div>
+                    <div class="profile-info">
+                        <h3>
+                            <span class="contact-name" th:text="${contact.names[0].displayName}"></span>
+                            <!-- Edit Icon -->
+                            <i class="fas fa-pencil-alt edit-icon" data-bs-toggle="modal"
+                               th:attr="data-bs-target='#editContactModal-' + ${#strings.replace(contact.resourceName, '/', '_')}"></i>
+                        </h3>
+                        <p class="subtitle" th:if="${contact.organizations != null and contact.organizations.size() > 0}"
+                           th:text="${contact.organizations[0].title}">Contact</p>
+                    </div>
+                </div>
+
+                <div class="contact-details">
+                    <div class="contact-item" th:if="${contact.emailAddresses != null and contact.emailAddresses.size() > 0}">
+                        <i class="fas fa-envelope"></i>
+                        <span th:text="${contact.emailAddresses[0].value}"></span>
+                        <span th:if="${contact.emailAddresses.size() > 1}"
+                              class="expandable" onclick="toggleAdditionalInfo(this)">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                    <div th:if="${contact.emailAddresses != null and contact.emailAddresses.size() > 1}"
+                         class="additional-info">
+                        <div class="contact-item" th:each="email, iter : ${contact.emailAddresses}" th:if="${iter.index > 0}">
+                            <i class="fas fa-envelope"></i>
+                            <span th:text="${email.value}"></span>
+                        </div>
+                    </div>
+
+                    <div class="contact-item" th:if="${contact.phoneNumbers != null and contact.phoneNumbers.size() > 0}">
+                        <i class="fas fa-phone"></i>
+                        <span th:text="${contact.phoneNumbers[0].value}"></span>
+                        <span th:if="${contact.phoneNumbers.size() > 1}"
+                              class="expandable" onclick="toggleAdditionalInfo(this)">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                    <div th:if="${contact.phoneNumbers != null and contact.phoneNumbers.size() > 1}"
+                         class="additional-info">
+                        <div class="contact-item" th:each="phone, iter : ${contact.phoneNumbers}" th:if="${iter.index > 0}">
+                            <i class="fas fa-phone"></i>
+                            <span th:text="${phone.value}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Contact Modal -->
+<div class="modal fade" id="addContactModal" tabindex="-1" aria-labelledby="addContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addContactModalLabel">Add New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/api/contacts/create" method="POST" onsubmit="return validateForm(this)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="givenName" placeholder="Enter first name (e.g., John)" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="familyName" placeholder="Enter last name (e.g., Doe)" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label-container">
+                            <label class="form-label">Email</label>
+                            <button type="button" class="add-field-btn" onclick="addField('emailFields', 'emails', 'email')">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <div id="emailFields">
+                            <input type="email" class="form-control" name="emails" placeholder="Enter email (e.g., john.doe@example.com)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label-container">
+                            <label class="form-label">Phone Number</label>
+                            <button type="button" class="add-field-btn" onclick="addField('phoneFields', 'phoneNumbers', 'tel')">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <div id="phoneFields">
+                            <input type="tel" class="form-control" name="phoneNumbers" pattern="[0-9]{11}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 11-digit phone number (e.g., 09123456789)">
+                            <div class="invalid-feedback">Phone number must be exactly 11 digits</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary mt-4">Create Contact</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Contact Modals -->
+<div th:each="contact : ${contacts}">
+    <div class="modal fade"
+         th:id="'editContactModal-' + ${#strings.replace(contact.resourceName, '/', '_')}"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Contact</h5>
+                    <div class="d-flex gap-2">
+                        <form th:action="@{/api/contacts/delete}" method="POST" class="d-inline" onsubmit="return confirmDelete()">
+                            <input type="hidden" name="resourceName" th:value="${contact.resourceName}">
+                            <button type="submit" class="delete-btn">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/api/contacts/update}" method="POST" onsubmit="return validateForm(this)">
+                        <input type="hidden" name="resourceName" th:value="${contact.resourceName}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="givenName" th:value="${contact.names[0].givenName}" placeholder="Enter first name (e.g., John)" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="familyName" th:value="${contact.names[0].familyName}" placeholder="Enter last name (e.g., Doe)" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label-container">
+                                <label class="form-label">Email</label>
+                                <button type="button" class="add-field-btn" onclick="addField('editEmailFields', 'emails', 'email')">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <div id="editEmailFields" class="field-container">
+                                <input th:unless="${contact.emailAddresses != null and contact.emailAddresses.size() > 0}" type="email" class="form-control" name="emails" placeholder="Enter email (e.g., john.doe@example.com)">
+                                <div th:each="email : ${contact.emailAddresses}">
+                                    <input type="email" class="form-control mb-2" name="emails" th:value="${email.value}" placeholder="Enter email (e.g., john.doe@example.com)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label-container">
+                                <label class="form-label">Phone</label>
+                                <button type="button" class="add-field-btn" onclick="addField('editPhoneFields', 'phoneNumbers', 'tel')">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <div id="editPhoneFields" class="field-container">
+                                <input th:unless="${contact.phoneNumbers != null and contact.phoneNumbers.size() > 0}" type="tel" class="form-control" name="phoneNumbers" pattern="[0-9]{11}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 11-digit phone number (e.g., 09123456789)">
+                                <div th:each="phone : ${contact.phoneNumbers}">
+                                    <input type="tel" class="form-control mb-2" name="phoneNumbers" th:value="${phone.value}" pattern="[0-9]{11}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 11-digit phone number (e.g., 09123456789)">
+                                </div>
+                                <div class="invalid-feedback">Phone number must be exactly 11 digits</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary mt-4">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this contact?");
+    }
+
+    function addField(containerId, fieldName, inputType) {
+        const container = document.getElementById(containerId);
+        const newField = document.createElement('input');
+        newField.type = inputType;
+        newField.className = 'form-control mt-2';
+        newField.name = fieldName;
+        if (inputType === 'tel') {
+            newField.pattern = '[0-9]{11}';
+            newField.maxLength = 11;
+            newField.oninput = function() { this.value = this.value.replace(/[^0-9]/g, ''); };
+            newField.placeholder = 'Enter 11-digit phone number (e.g., 09123456789)';
+        } else if (inputType === 'email') {
+            newField.placeholder = 'Enter email (e.g., john.doe@example.com)';
+        }
+        container.appendChild(newField);
+    }
+
+    function validateForm(form) {
+        const phoneInputs = form.querySelectorAll('input[name="phoneNumbers"]');
+        for (let phoneInput of phoneInputs) {
+            const phoneValue = phoneInput.value;
+            if (phoneValue && (phoneValue.length !== 11 || !/^\d{11}$/.test(phoneValue))) {
+                phoneInput.classList.add('is-invalid');
+                return false;
+            }
+            phoneInput.classList.remove('is-invalid');
+        }
+        return true;
+    }
+
+    function toggleAdditionalInfo(element) {
+        const additionalInfo = element.parentElement.nextElementSibling;
+        additionalInfo.classList.toggle('show');
+        const icon = element.querySelector('i');
+        if (additionalInfo.classList.contains('show')) {
+            icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+        } else {
+            icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+        }
+    }
+
+    // Search functionality
+    function searchContacts() {
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        const contactCards = document.querySelectorAll('.contact-card');
+
+        contactCards.forEach(card => {
+            const contactName = card.querySelector('.contact-name').textContent.toLowerCase();
+            if (contactName.includes(searchQuery)) {
+                card.style.display = 'block'; // Show the card
+            } else {
+                card.style.display = 'none'; // Hide the card
+            }
+        });
+    }
+</script>
+</body>
+</html>
