@@ -12,23 +12,23 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain defaultSecurityChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilter(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll() // Allow access to landing page and static resources
-                        .anyRequest().authenticated() // All other requests require authentication
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll() // Public access
+                        .anyRequest().authenticated() // Secure all other endpoints
                 )
                 .oauth2Login(oauth -> oauth
-                        .defaultSuccessUrl("/contacts", true) // Redirect to /contacts after successful login
+                        .defaultSuccessUrl("/contacts", true) // Redirect after login
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout") // Custom logout URL
-                        .logoutSuccessUrl("/") // Redirect to login page after logout
-                        .invalidateHttpSession(true) // Invalidate session
-                        .deleteCookies("JSESSIONID") // Delete cookies
+                        .logoutSuccessUrl("/") // Redirect to home after logout
+                        .invalidateHttpSession(true) // Clear session
+                        .deleteCookies("JSESSIONID") // Remove cookies
                         .permitAll()
                 )
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF (ensure this is intentional)
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF (for simplicity)
                 .build();
     }
 }
