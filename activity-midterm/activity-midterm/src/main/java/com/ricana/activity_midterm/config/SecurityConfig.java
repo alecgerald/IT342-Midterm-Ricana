@@ -10,14 +10,25 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Bean
-    public SecurityFilterChain defaultSecurityChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain defaultSecurityChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .oauth2Login(oauth -> oauth.defaultSuccessUrl("/user-info", true))
-                .logout(logout -> logout.logoutSuccessUrl("/"))
-                .formLogin(form -> form.defaultSuccessUrl("/secured", true))
-                .csrf(AbstractHttpConfigurer:: disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll() // Allow access to landing page and static resources
+                        .anyRequest().authenticated() // All other requests require authentication
+                )
+                .oauth2Login(oauth -> oauth
+                        .defaultSuccessUrl("/contacts", true) // Redirect to /contacts after successful login
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // Custom logout URL
+                        .logoutSuccessUrl("/") // Redirect to login page after logout
+                        .invalidateHttpSession(true) // Invalidate session
+                        .deleteCookies("JSESSIONID") // Delete cookies
+                        .permitAll()
+                )
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF (ensure this is intentional)
                 .build();
     }
 }
