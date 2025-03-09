@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class LoginController {
 
     @GetMapping("/")
-    public String showLoginPage() {
-        return "login"; // Returns the login.html Thymeleaf template
+    public String displayLoginPage() {
+        return "login"; // Render the login page
     }
-
 }
